@@ -19,23 +19,47 @@ if (canvas.getContext) {
         draw();
     }
     function draw() {
-        ctx.clearRect(0,0, canvas.width, canvas.height);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.font = "100px Lato";
         ctx.textBaseline = "middle";
-        const textMeasurements = ctx.measureText("Severi Lybeck");
-        ctx.fillText("Severi Lybeck", (canvas.width/2)-textMeasurements.width/2, canvas.height/2);
+        const text = ctx.measureText("Severi Lybeck");
+        ctx.fillText("Severi Lybeck", (canvas.width / 2) - text.width / 2, canvas.height / 2);
         let raycasts = ctx.getImageData(0, 0, canvas.width, canvas.height);
         //ctx.putImageData(raycasts, 0, 0);
-        for(let i = 0; i< 3600; i++) {
+
+        //does the raycasting
+        for (let i = 0; i < Math.PI * 2*10; i++) {
             let baseX = mouseX;
             let baseY = mouseY;
-            let endX = mouseX+Math.sin(i/180*Math.PI)*raycastLength;
-            let endY = mouseY+Math.cos(i/180*Math.PI)*raycastLength;
+            let endX = mouseX + Math.sin(i) * raycastLength;
+            let endY = mouseY + Math.cos(i) * raycastLength;
+            raycastToTextCollision(baseX, baseY, i);
             ctx.strokeStyle = "blue";
             ctx.beginPath();
             ctx.moveTo(baseX, baseY);
             ctx.lineTo(endX, endY);
             ctx.stroke();
+        }
+        //binary search the collision point
+        function raycastToTextCollision(sx, sy, angle) {
+            let continueCheck = true;
+            while (continueCheck) {
+                //start by checking text rectangle end angles compared to mousepos;
+                if (sy > canvas.height / 2) {
+                    const textMaxAngle = Math.atan((canvas.height/2 + text.actualBoundingBoxDescent) / ((canvas.width/2) + text.actualBoundingBoxLeft));
+                    const textMinAngle = Math.atan((canvas.height/2 + text.actualBoundingBoxDescent) / ((canvas.width/2) + text.actualBoundingBoxRight));
+                    console.log((textMaxAngle/Math.PI)*180);
+                    console.log((textMinAngle/Math.PI)*180);
+                }
+                else {
+                    const textMaxAngle = Math.atan((canvas.height/2 + text.actualBoundingBoxAscent) / ((canvas.width/2) + text.actualBoundingBoxLeft));
+                    const textMinAngle = Math.atan((canvas.height/2 + text.actualBoundingBoxAcent) / ((canvas.width/2) + text.actualBoundingBoxRight));
+                    console.log((textMaxAngle/Math.PI)*180);
+                    console.log((textMinAngle/Math.PI)*180);
+                }
+
+                continueCheck = false;
+            }
         }
         requestAnimationFrame(draw);
     }
